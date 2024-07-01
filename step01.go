@@ -1,5 +1,3 @@
-//go:build ignore
-
 // Step01: 逐次ダウンロード
 package main
 
