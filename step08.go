@@ -125,6 +125,7 @@ func download(ctx context.Context, dir, dlurlStr string) error {
 	defer resp.Body.Close()
 
 	_, filename := path.Split(dlurl.Path)
+	filename, _, _ = strings.Cut(filename, "?") // remove query params
 	dlpath := filepath.Join(dir, filename)
 	file, err := os.Create(dlpath)
 	if err != nil {

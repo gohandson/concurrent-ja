@@ -1,4 +1,4 @@
-// Step10: リトライする
+// Step11: gogroupを使う
 package main
 
 import (
@@ -16,14 +16,13 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/backoff/v2"
-	"github.com/sourcegraph/conc/panics"
-	"github.com/sourcegraph/conc/pool"
+	"github.com/newmo-oss/gogroup"
 )
 
 var baseURL *url.URL
 
 func init() {
-	const baseURLStr = "http://localhost:8080/html/step10.html"
+	const baseURLStr = "http://localhost:8080/html/step11.html"
 	_url, err := url.Parse(baseURLStr)
 	if err != nil {
 		panic(err)
@@ -72,32 +71,21 @@ func run(ctx context.Context) (rerr error) {
 		Dir: "imgs",
 	}
 
-	// .WithFirstError()とするとerrgroupと同じ挙動になる
-	p := pool.New().WithContext(ctx).WithMaxGoroutines(2)
+	var g gogroup.Group
 	for _, src := range srcs {
-		p.Go(func(ctx context.Context) error {
+		g.Add(func(ctx context.Context) error {
 			fmt.Println("download start", src)
 			defer fmt.Println("download done", src)
 
-			var rerr error
-			recovered := panics.Try(func() {
-				if err := dl.Do(ctx, src); err != nil {
-					rerr = err
-				}
-			})
-
-			switch {
-			case recovered != nil:
-				return fmt.Errorf("recovered: %w", recovered.AsError())
-			case rerr != nil:
-				return rerr
+			if err := dl.Do(ctx, src); err != nil {
+				return err
 			}
 
 			return nil
 		})
 	}
 
-	if err := p.Wait(); err != nil {
+	if err := g.Run(ctx, gogroup.WithLimit(2)); err != nil {
 		return err
 	}
 
