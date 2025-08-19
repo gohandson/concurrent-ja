@@ -42,12 +42,10 @@ func run() error {
 	var wg sync.WaitGroup
 	for _, src := range srcs {
 		fmt.Println("download", src)
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			download("imgs", src)
 			fmt.Println("download done", src)
-			wg.Done()
-		}()
+		})
 	}
 
 	wg.Wait()

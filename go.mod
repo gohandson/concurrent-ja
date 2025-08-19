@@ -13,4 +13,5 @@ require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
 )
